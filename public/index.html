@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Trakin Thumbnail Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Hind:wght@700&family=Inter:wght@400;500;600;700&family=Poppins:wght@800;900&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0b0d12; --panel: #12151d; --panel2: #181c26; --line: #252a37;
+    --text: #e9ecf2; --muted: #8a93a6; --accent: #14b8a6; --accent2: #0d9488;
+    --danger: #f43f5e; --ok: #22c55e; --warn: #f59e0b; --r: 12px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--text); font: 14px/1.45 Inter, system-ui, sans-serif; }
+  button, input, select, textarea { font: inherit; color: inherit; }
+  header { display: flex; align-items: center; gap: 14px; padding: 12px 20px; border-bottom: 1px solid var(--line); background: #0d1016; position: sticky; top: 0; z-index: 5; }
+  .brand { font-weight: 700; font-size: 16px; letter-spacing: .2px; display: flex; align-items: center; gap: 10px; }
+  .brand i { width: 26px; height: 26px; border-radius: 7px; background: linear-gradient(135deg, var(--accent), #0ea5e9); display: inline-block; }
+  .status { margin-left: auto; display: flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; background: var(--panel2); border: 1px solid var(--line); font-size: 13px; cursor: pointer; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+  .dot.ok { background: var(--ok); box-shadow: 0 0 8px var(--ok); } .dot.bad { background: var(--danger); }
+  main { display: grid; grid-template-columns: 440px 1fr; height: calc(100% - 55px); }
+  aside { border-right: 1px solid var(--line); overflow-y: auto; padding: 18px 18px 110px; background: var(--panel); }
+  section.step { margin-bottom: 22px; }
+  .step h3 { margin: 0 0 10px; font-size: 13px; font-weight: 600; text-transform: uppercase; letter-spacing: .8px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .step h3 b { width: 20px; height: 20px; border-radius: 50%; display: grid; place-items: center; background: var(--panel2); border: 1px solid var(--line); color: var(--text); font-size: 11px; }
+  .req { color: var(--danger); text-transform: none; letter-spacing: 0; font-weight: 500; }
+  .styles { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .style { border: 1.5px solid var(--line); border-radius: 10px; padding: 8px; cursor: pointer; background: var(--panel2); transition: .15s; }
+  .style:hover { border-color: #3a4152; }
+  .style.on { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(20,184,166,.15); }
+  .sw { height: 38px; border-radius: 6px; margin-bottom: 6px; }
+  .style span { font-size: 12.5px; font-weight: 600; }
+  .seg { display: flex; background: var(--panel2); border: 1px solid var(--line); border-radius: 10px; padding: 3px; gap: 3px; }
+  .seg button { flex: 1; border: 0; background: transparent; padding: 7px 6px; border-radius: 7px; cursor: pointer; color: var(--muted); font-size: 12.5px; font-weight: 500; }
+  .seg button.on { background: var(--accent2); color: #fff; }
+  .drop { border: 1.5px dashed #34405a; border-radius: var(--r); padding: 16px; text-align: center; color: var(--muted); cursor: pointer; background: #0f1219; transition: .15s; }
+  .drop.over { border-color: var(--accent); background: rgba(20,184,166,.06); color: var(--text); }
+  .drop strong { color: var(--text); }
+  .thumbs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+  .thumbs .t { position: relative; aspect-ratio: 16/10; border-radius: 8px; overflow: hidden; border: 1px solid var(--line); background: #000; }
+  .thumbs img { width: 100%; height: 100%; object-fit: cover; }
+  .x { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; border-radius: 50%; border: 0; background: rgba(0,0,0,.7); color: #fff; cursor: pointer; font-size: 13px; line-height: 1; }
+  .avatars { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+  .av { aspect-ratio: 1; border-radius: 10px; border: 1.5px solid var(--line); background: var(--panel2) center/cover no-repeat; cursor: pointer; display: grid; place-items: center; color: var(--muted); font-size: 11.5px; text-align: center; position: relative; overflow: hidden; }
+  .av.on { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(20,184,166,.15); }
+  .av.add { border-style: dashed; font-size: 22px; }
+  .refs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; max-height: 300px; overflow-y: auto; padding: 2px; }
+  .ref { position: relative; aspect-ratio: 9/16; border-radius: 8px; border: 1.5px solid var(--line); background: var(--panel2) center/cover no-repeat; cursor: pointer; opacity: .55; transition: .15s; }
+  .ref.on { opacity: 1; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(20,184,166,.15); }
+  .ref.on::after { content: "✓"; position: absolute; left: 5px; top: 4px; width: 18px; height: 18px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 11px; display: grid; place-items: center; }
+  .ref .x { display: none; } .ref:hover .x { display: block; }
+  .ref.add { opacity: 1; border-style: dashed; display: grid; place-items: center; color: var(--muted); font-size: 12px; text-align: center; }
+  .row { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+  .row > * { flex: 1; }
+  label.lbl { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 5px; }
+  input[type=text], textarea, select { width: 100%; background: #0f1219; border: 1px solid var(--line); border-radius: 9px; padding: 9px 11px; outline: none; }
+  input[type=text]:focus, textarea:focus, select:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 60px; }
+  .headline { font-size: 16px; font-weight: 600; }
+  .hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  details summary { cursor: pointer; color: var(--muted); font-size: 13px; }
+  .gen { position: fixed; bottom: 0; left: 0; width: 440px; padding: 14px 18px; background: linear-gradient(transparent, var(--panel) 30%); }
+  .btn { border: 0; border-radius: 10px; padding: 12px 16px; font-weight: 600; cursor: pointer; background: var(--panel2); border: 1px solid var(--line); }
+  .btn.primary { width: 100%; background: linear-gradient(135deg, var(--accent), #0ea5e9); border: 0; color: #fff; font-size: 15px; padding: 14px; box-shadow: 0 8px 24px rgba(20,184,166,.25); }
+  .btn:disabled { opacity: .5; cursor: not-allowed; }
+  .stage { overflow-y: auto; padding: 22px 26px 40px; }
+  .empty { height: 100%; display: grid; place-items: center; text-align: center; color: var(--muted); }
+  .empty .mock { width: 480px; max-width: 80%; aspect-ratio: 16/9; border-radius: 14px; border: 1.5px dashed #2c3343; margin: 0 auto 16px; display: grid; place-items: center; font-size: 13px; }
+  .progress { background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; margin-bottom: 20px; }
+  .bar { height: 6px; background: var(--panel2); border-radius: 99px; overflow: hidden; margin: 12px 0; }
+  .bar i { display: block; height: 100%; width: 30%; background: linear-gradient(90deg, var(--accent), #0ea5e9); border-radius: 99px; animation: slide 1.4s infinite ease-in-out; }
+  @keyframes slide { 0% { transform: translateX(-100%);} 100% { transform: translateX(350%);} }
+  pre.log { background: #07090d; border: 1px solid var(--line); border-radius: 8px; padding: 10px; max-height: 220px; overflow: auto; font-size: 11.5px; color: #9aa4b8; white-space: pre-wrap; }
+  .err { color: var(--danger); font-weight: 600; }
+  .results { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; margin-bottom: 26px; }
+  .res { border-radius: 12px; overflow: hidden; border: 2px solid var(--line); cursor: pointer; background: #000; transition: .15s; }
+  .res:hover { transform: translateY(-2px); }
+  .res.on { border-color: var(--accent); }
+  .res img { width: 100%; display: block; }
+  .editor { display: grid; grid-template-columns: 1fr 260px; gap: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; }
+  .editor canvas { width: 100%; height: auto; border-radius: 8px; background: #000; display: block; }
+  .ctrl label { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 4px; }
+  .ctrl input[type=range] { width: 100%; accent-color: var(--accent); }
+  .ctrl input[type=color] { width: 100%; height: 34px; border: 1px solid var(--line); border-radius: 8px; background: #0f1219; padding: 2px; }
+  .chk { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; }
+  h2 { font-size: 15px; margin: 0 0 12px; }
+  .hist { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; }
+  .hist img { height: 70px; border-radius: 6px; border: 1px solid var(--line); cursor: pointer; }
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: none; place-items: center; z-index: 20; }
+  .modal.show { display: grid; }
+  .modal .card { background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px; width: 520px; max-width: 92vw; }
+  code { background: #07090d; border: 1px solid var(--line); padding: 2px 6px; border-radius: 5px; font-size: 12.5px; }
+  @media (max-width: 960px) { main { grid-template-columns: 1fr; height: auto; } aside { padding-bottom: 20px; } .gen { position: static; width: auto; padding: 0; margin-top: 10px; } .editor { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><i></i> Trakin Thumbnail Studio</div>
+  <div class="status" id="status" title="ChatGPT connection"><span class="dot" id="statusDot"></span><span id="statusText">Checking ChatGPT connection…</span></div>
+  <button class="btn" id="logoutBtn" hidden style="padding:6px 12px;font-size:13px">Sign out</button>
+</header>
+
+<main>
+  <aside>
+    <section class="step">
+      <h3><b>1</b> Style</h3>
+      <div class="styles" id="styles"></div>
+      <textarea id="customStyle" placeholder="Extra style notes (optional) — e.g. 'Diwali theme, diyas in background'" style="margin-top:8px; min-height:44px"></textarea>
+      <label class="lbl">Format</label>
+      <div class="seg" id="aspect">
+        <button data-v="9:16" class="on">Reel 9:16</button><button data-v="16:9">YouTube 16:9</button><button data-v="1:1">Post 1:1</button>
+      </div>
+    </section>
+
+    <section class="step">
+      <h3><b>2</b> Past thumbnails <span style="text-transform:none;letter-spacing:0;font-weight:400">— style reference</span></h3>
+      <div class="refs" id="refs"></div>
+      <input type="file" id="refInput" accept="image/png,image/jpeg,image/webp" multiple hidden />
+      <div class="hint" id="refHint">Upload your previous thumbnails once. Tick up to 4 and ChatGPT matches their look (not their content). Tick none and the 3 closest matches to your headline are picked for you.</div>
+    </section>
+
+    <section class="step">
+      <h3><b>3</b> Media <span style="text-transform:none;letter-spacing:0;font-weight:400">— screenshots, product shots, logos</span></h3>
+      <div class="drop" id="drop">
+        <strong>Drop images here</strong>, click to browse,<br/>or press <code>Ctrl+V</code> to paste a screenshot
+        <input type="file" id="mediaInput" accept="image/png,image/jpeg,image/webp" multiple hidden />
+      </div>
+      <div class="thumbs" id="mediaThumbs"></div>
+    </section>
+
+    <section class="step">
+      <h3><b>4</b> Host avatar</h3>
+      <div class="avatars" id="avatars"></div>
+      <input type="file" id="avatarInput" accept="image/png,image/jpeg,image/webp" hidden />
+      <label class="lbl">Position</label>
+      <div class="seg" id="avPos">
+        <button data-v="left">Bottom left</button><button data-v="center" class="on">Bottom middle</button><button data-v="right">Bottom right</button>
+      </div>
+      <label class="lbl">Expression</label>
+      <select id="expression">
+        <option>excited, mouth slightly open</option>
+        <option>shocked, wide eyes, hands on face</option>
+        <option>confident smile, arms crossed</option>
+        <option>pointing at the product, enthusiastic</option>
+        <option>serious, curious, eyebrow raised</option>
+        <option>happy laughing</option>
+      </select>
+    </section>
+
+    <section class="step">
+      <h3><b>5</b> Text <span class="req">* required</span></h3>
+      <input type="text" id="headline" class="headline" maxlength="120" placeholder="Headline, e.g. iPhone 18 बनाम Pixel 11" />
+      <input type="text" id="subtext" maxlength="120" placeholder="Small line (optional), e.g. Camera Test" style="margin-top:8px" />
+      <label class="lbl">Who draws the text?</label>
+      <div class="seg" id="textMode">
+        <button data-v="ai" class="on">ChatGPT designs it</button><button data-v="overlay">I add it after (exact font)</button>
+      </div>
+      <div class="hint" id="textModeHint">The image model styles the text into the design. Check spelling in the result.</div>
+    </section>
+
+    <section class="step">
+      <details>
+        <summary>More options</summary>
+        <label class="lbl">Number of options</label>
+        <div class="seg" id="count"><button data-v="1">1</button><button data-v="2" class="on">2</button><button data-v="3">3</button><button data-v="4">4</button></div>
+        <label class="lbl">Extra instructions</label>
+        <textarea id="notes" placeholder="Anything else, e.g. 'add a red arrow pointing at the camera bump'"></textarea>
+      </details>
+    </section>
+
+    <div class="gen"><button class="btn primary" id="genBtn">Generate thumbnails</button></div>
+  </aside>
+
+  <div class="stage" id="stage">
+    <div id="progressBox"></div>
+    <div id="resultsWrap" hidden>
+      <h2>Results <span style="color:var(--muted);font-weight:400;font-size:13px">— click one to edit and download</span></h2>
+      <div class="results" id="results"></div>
+      <div class="editor" id="editor" hidden>
+        <canvas id="canvas"></canvas>
+        <div class="ctrl">
+          <div class="chk"><input type="checkbox" id="ovText" /> <label for="ovText" style="margin:0">Add headline overlay</label></div>
+          <label>Font</label>
+          <select id="ovFont">
+            <option value="Anton">Anton (YouTube bold)</option>
+            <option value="Poppins">Poppins Black</option>
+            <option value="Hind">Hind (Hindi / Devanagari)</option>
+            <option value="Impact">Impact</option>
+          </select>
+          <label>Size</label><input type="range" id="ovSize" min="40" max="220" value="120" />
+          <label>Position</label>
+          <select id="ovPos"><option value="top">Top</option><option value="bottom">Bottom</option><option value="left">Left</option><option value="right">Right</option></select>
+          <div class="row" style="margin-top:0"><div><label>Text</label><input type="color" id="ovColor" value="#ffffff" /></div><div><label>Highlight</label><input type="color" id="ovHi" value="#ffd60a" /></div></div>
+          <label>Highlight word # (0 = none)</label><input type="range" id="ovHiWord" min="0" max="8" value="0" />
+          <div class="chk"><input type="checkbox" id="ovLogo" checked /> <label for="ovLogo" style="margin:0">Trakin logo (top-right)</label></div>
+          <div class="hint" id="logoHint"></div>
+          <button class="btn primary" id="dlBtn" style="margin-top:14px">Download PNG</button>
+        </div>
+      </div>
+    </div>
+    <div id="emptyState" class="empty">
+      <div>
+        <div class="mock">Your thumbnails appear here</div>
+        Pick a style, add your media and host, type the headline, then hit <b>Generate</b>.<br/>
+        Images are made with <b>your own ChatGPT account</b>, about 1–3 minutes per batch.
+      </div>
+    </div>
+    <div id="historyWrap" style="margin-top:28px" hidden>
+      <h2>Recent</h2>
+      <div class="hist" id="history"></div>
+    </div>
+  </div>
+</main>
+
+<div class="modal" id="loginModal" style="background:var(--bg)">
+  <form class="card" id="loginForm" style="width:400px">
+    <div class="brand" style="margin-bottom:18px"><i></i> Trakin Thumbnail Studio</div>
+    <label class="lbl">Your name</label>
+    <input type="text" id="loginName" autocomplete="username" placeholder="e.g. Omkar" required />
+    <label class="lbl">Team password</label>
+    <input type="text" id="loginPass" autocomplete="current-password" style="-webkit-text-security:disc" required />
+    <div class="err" id="loginErr" style="margin-top:10px;font-size:13px"></div>
+    <button class="btn primary" style="margin-top:16px">Sign in</button>
+    <div class="hint">Use the same name every time — your ChatGPT connection is saved under it.</div>
+  </form>
+</div>
+
+<div class="modal" id="setupModal">
+  <div class="card">
+    <h2 id="setupTitle">Connect your ChatGPT account</h2>
+    <div id="setupBody"></div>
+    <div class="row" style="margin-top:18px"><button class="btn" id="recheck">Check again</button><button class="btn" onclick="setupModal.classList.remove('show')">Close</button></div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const state = { refs: [], style: null, aspect: "9:16", media: [], avatar: null, avPos: "center", textMode: "ai", count: 2, job: null, selected: null, logo: null, lastJob: null };
+const SIZES = { "16:9": [1280, 720], "9:16": [1080, 1920], "1:1": [1080, 1080] };
+
+// ---------- segmented controls ----------
+function seg(id, key, onChange) {
+  $(id).addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    [...$(id).children].forEach((x) => x.classList.toggle("on", x === b));
+    state[key] = key === "count" ? +b.dataset.v : b.dataset.v;
+    onChange && onChange();
+  });
+}
+seg("aspect", "aspect"); seg("avPos", "avPos"); seg("count", "count");
+seg("textMode", "textMode", () => {
+  $("textModeHint").textContent = state.textMode === "ai"
+    ? "The image model styles the text into the design. Check spelling in the result."
+    : "The image is made with empty space; you place the exact text and font in the editor afterwards.";
+});
+
+// ---------- sign-in + connection status ----------
+let HOSTED = false, connectTimer = null;
+async function api(url, opts) {
+  const r = await fetch(url, opts);
+  if (r.status === 401 && HOSTED && !url.startsWith("/api/login")) { showLogin(); throw new Error("Sign in first"); }
+  return r;
+}
+function showLogin() { $("loginModal").classList.add("show"); $("loginName").focus(); }
+$("loginForm").onsubmit = async (e) => {
+  e.preventDefault(); $("loginErr").textContent = "";
+  const r = await fetch("/api/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: $("loginName").value, password: $("loginPass").value }) });
+  const j = await r.json();
+  if (!r.ok) { $("loginErr").textContent = j.error || "Could not sign in"; return; }
+  $("loginModal").classList.remove("show"); boot();
+};
+$("logoutBtn").onclick = async () => { await fetch("/api/logout", { method: "POST" }); location.reload(); };
+
+async function checkStatus() {
+  $("statusText").textContent = "Checking ChatGPT connection…"; $("statusDot").className = "dot";
+  try {
+    const s = await (await api("/api/status")).json();
+    const who = s.user && s.user !== "local" ? s.user + " · " : "";
+    if (!s.installed) { setStatus("bad", "Image engine not installed"); showSetup("install"); }
+    else if (!s.loggedIn) { setStatus("bad", who + "Connect ChatGPT"); showSetup(HOSTED ? "connect" : "login"); }
+    else { setStatus("ok", who + "ChatGPT connected"); $("setupModal").classList.remove("show"); }
+  } catch { setStatus("bad", "Server not reachable"); }
+}
+function setStatus(cls, text) { $("statusDot").className = "dot " + cls; $("statusText").textContent = text; }
+function showSetup(kind) {
+  const body = $("setupBody");
+  if (kind === "connect") {
+    $("setupTitle").textContent = "Connect your ChatGPT account";
+    body.innerHTML = `<p>Thumbnails are made with <b>your own</b> ChatGPT account and count against your plan.</p>
+      <p><b>One-time step:</b> in ChatGPT go to <b>Settings → Security</b> and turn on <b>Device code login</b> (also called “device code authorization”).</p>
+      <button class="btn primary" id="startConnect">Connect ChatGPT</button>
+      <div id="connectBox" style="margin-top:14px"></div>`;
+    $("startConnect").onclick = startConnect;
+  } else if (kind === "install") {
+    $("setupTitle").textContent = "Setup needed";
+    body.innerHTML = HOSTED
+      ? `<p>The server is missing its image engine. Ask whoever hosts this app to redeploy it with the included Dockerfile.</p>`
+      : `<ol><li>Install Node.js LTS from <b>nodejs.org</b>.</li><li>Close this and double-click <b>start.bat</b> again — it installs everything else.</li></ol>`;
+  } else {
+    $("setupTitle").textContent = "Connect your ChatGPT account";
+    body.innerHTML = `<p>Close this window and the black window, then double-click <b>start.bat</b> again — it opens the ChatGPT sign-in page.</p>`;
+  }
+  $("setupModal").classList.add("show");
+}
+async function startConnect() {
+  $("startConnect").disabled = true;
+  $("connectBox").innerHTML = `<div class="hint">Getting your sign-in code…</div>`;
+  const s = await (await api("/api/chatgpt/connect", { method: "POST" })).json();
+  renderConnect(s);
+  clearInterval(connectTimer);
+  connectTimer = setInterval(async () => {
+    const st = await (await api("/api/chatgpt/connect")).json();
+    renderConnect(st);
+    if (st.status === "done" || st.status === "failed") clearInterval(connectTimer);
+    if (st.status === "done") checkStatus();
+  }, 3000);
+}
+function renderConnect(s) {
+  const box = $("connectBox"); if (!box) return;
+  if (s.status === "waiting" && s.code) {
+    box.innerHTML = `<p>1. Open <a href="${escapeHtml(s.url)}" target="_blank" rel="noopener" style="color:var(--accent)">${escapeHtml(s.url)}</a> and sign in to ChatGPT.</p>
+      <p>2. Enter this code:</p>
+      <div style="font:700 30px/1 ui-monospace,monospace;letter-spacing:3px;background:#07090d;border:1px solid var(--line);border-radius:10px;padding:16px;text-align:center;cursor:pointer" title="Click to copy" onclick="navigator.clipboard.writeText('${escapeHtml(s.code)}')">${escapeHtml(s.code)}</div>
+      <p class="hint">The code works for 15 minutes. This page updates by itself once you're connected. Only enter a code that you generated here yourself.</p>`;
+  } else if (s.status === "done") {
+    box.innerHTML = `<p style="color:var(--ok);font-weight:600">Connected! You can start making thumbnails.</p>`;
+  } else if (s.status === "failed") {
+    box.innerHTML = `<p class="err">Couldn't connect. Check that Device code login is turned on in ChatGPT → Settings → Security, then try again.</p>
+      ${s.log ? `<details><summary>Details</summary><pre class="log">${escapeHtml(s.log)}</pre></details>` : ""}`;
+    $("startConnect").disabled = false;
+  }
+}
+$("status").onclick = () => { checkStatus(); };
+$("recheck").onclick = checkStatus;
+
+// ---------- styles ----------
+async function loadStyles() {
+  const styles = await (await api("/api/styles")).json();
+  $("styles").innerHTML = styles.map((s) => `
+    <div class="style" data-id="${s.id}">
+      <div class="sw" style="background: linear-gradient(135deg, ${s.swatch[0]} 0%, ${s.swatch[0]} 45%, ${s.swatch[1]} 75%, ${s.swatch[2]} 100%)"></div>
+      <span>${s.name}</span>
+    </div>`).join("");
+  $("styles").onclick = (e) => {
+    const el = e.target.closest(".style"); if (!el) return;
+    [...$("styles").children].forEach((x) => x.classList.toggle("on", x === el));
+    state.style = el.dataset.id;
+  };
+  $("styles").firstElementChild.click();
+}
+
+// ---------- image helpers ----------
+function fileToDataUrl(file, max = 1600) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      resolve(c.toDataURL(file.type === "image/png" ? "image/png" : "image/jpeg", 0.92));
+      URL.revokeObjectURL(img.src);
+    };
+    img.onerror = () => reject(new Error("Could not read " + file.name));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// ---------- media ----------
+async function addMedia(files) {
+  for (const f of files) {
+    if (!/^image\//.test(f.type)) continue;
+    if (state.media.length >= 6) { alert("Maximum 6 media files"); break; }
+    state.media.push(await fileToDataUrl(f));
+  }
+  renderMedia();
+}
+function renderMedia() {
+  $("mediaThumbs").innerHTML = state.media.map((m, i) => `<div class="t"><img src="${m}"/><button class="x" data-i="${i}">✕</button></div>`).join("");
+}
+$("mediaThumbs").onclick = (e) => { if (e.target.dataset.i) { state.media.splice(+e.target.dataset.i, 1); renderMedia(); } };
+$("drop").onclick = () => $("mediaInput").click();
+$("mediaInput").onchange = (e) => { addMedia([...e.target.files]); e.target.value = ""; };
+["dragenter", "dragover"].forEach((ev) => $("drop").addEventListener(ev, (e) => { e.preventDefault(); $("drop").classList.add("over"); }));
+["dragleave", "drop"].forEach((ev) => $("drop").addEventListener(ev, (e) => { e.preventDefault(); $("drop").classList.remove("over"); }));
+$("drop").addEventListener("drop", (e) => addMedia([...e.dataTransfer.files]));
+document.addEventListener("paste", (e) => {
+  if (["INPUT", "TEXTAREA"].includes(document.activeElement.tagName)) return;
+  const files = [...e.clipboardData.items].filter((i) => i.type.startsWith("image/")).map((i) => i.getAsFile());
+  if (files.length) addMedia(files);
+});
+
+// ---------- avatars ----------
+async function loadAvatars(selectName) {
+  const list = await (await api("/api/avatars")).json();
+  $("avatars").innerHTML =
+    `<div class="av ${!state.avatar ? "on" : ""}" data-none="1">No host</div>` +
+    list.map((a) => `<div class="av ${state.avatar?.library === a.name ? "on" : ""}" data-name="${a.name}" title="${a.name}" style="background-image:url('${a.url}')"></div>`).join("") +
+    `<div class="av add" data-add="1" title="Upload a new host photo">+</div>`;
+  if (selectName) selectAvatar(selectName);
+}
+function selectAvatar(name) {
+  state.avatar = name ? { library: name } : null;
+  [...$("avatars").children].forEach((x) => x.classList.toggle("on", name ? x.dataset.name === name : !!x.dataset.none));
+}
+$("avatars").onclick = (e) => {
+  const el = e.target.closest(".av"); if (!el) return;
+  if (el.dataset.add) return $("avatarInput").click();
+  selectAvatar(el.dataset.none ? null : el.dataset.name);
+};
+$("avatarInput").onchange = async (e) => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  const name = prompt("Name for this host (saved to the avatar library):", f.name.replace(/\.[^.]+$/, "")) || "host";
+  const dataUrl = await fileToDataUrl(f, 1400);
+  const r = await (await api("/api/avatars", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, image: dataUrl }) })).json();
+  if (r.error) return alert(r.error);
+  loadAvatars(r.name);
+};
+
+// ---------- reference thumbnails ----------
+async function loadRefs(selectNew = []) {
+  const list = await (await api("/api/references")).json();
+  const names = new Set(list.map((r) => r.name));
+  state.refs = [...state.refs.filter((n) => names.has(n)), ...selectNew].slice(0, 4);
+  $("refs").innerHTML = list.map((r) => `<div class="ref ${state.refs.includes(r.name) ? "on" : ""}" data-name="${r.name}" style="background-image:url('${r.url}')"><button class="x" data-del="${r.name}" title="Remove from library">✕</button></div>`).join("")
+    + `<div class="ref add" data-add="1">+ Add past<br/>thumbnails</div>`;
+}
+$("refs").onclick = async (e) => {
+  if (e.target.dataset.del) {
+    e.stopPropagation();
+    if (!confirm("Remove this thumbnail from the reference library?")) return;
+    await api("/api/references/delete", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name: e.target.dataset.del }) });
+    return loadRefs();
+  }
+  const el = e.target.closest(".ref"); if (!el) return;
+  if (el.dataset.add) return $("refInput").click();
+  const n = el.dataset.name;
+  if (state.refs.includes(n)) state.refs = state.refs.filter((x) => x !== n);
+  else if (state.refs.length >= 4) return alert("Pick up to 4 references. Untick one first.");
+  else state.refs.push(n);
+  el.classList.toggle("on", state.refs.includes(n));
+};
+$("refInput").onchange = async (e) => {
+  const files = [...e.target.files].slice(0, 20); e.target.value = ""; if (!files.length) return;
+  $("refHint").textContent = "Uploading…";
+  const images = []; for (const f of files) images.push(await fileToDataUrl(f, 1280));
+  const saved = await (await api("/api/references", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ images }) })).json();
+  $("refHint").textContent = "Upload your previous thumbnails once. Tick up to 4 and ChatGPT matches their look (not their content). Tick none and the 3 closest matches to your headline are picked for you.";
+  loadRefs(Array.isArray(saved) ? saved.slice(0, Math.max(0, 4 - state.refs.length)) : []);
+};
+
+// ---------- generate ----------
+$("genBtn").onclick = async () => {
+  const headline = $("headline").value.trim();
+  if (!headline) { $("headline").focus(); $("headline").style.borderColor = "var(--danger)"; return; }
+  $("headline").style.borderColor = "";
+  if (state.style === "custom" && !$("customStyle").value.trim()) { alert("Describe your custom style in the notes box."); return; }
+  const body = {
+    references: state.refs, style: state.style, customStyle: $("customStyle").value, aspect: state.aspect,
+    media: state.media, avatar: state.avatar, avatarPosition: state.avPos, expression: $("expression").value,
+    headline, subtext: $("subtext").value, textMode: state.textMode, count: state.count, notes: $("notes").value,
+  };
+  $("genBtn").disabled = true;
+  try {
+    const r = await (await api("/api/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) })).json();
+    if (r.error) throw new Error(r.error);
+    state.job = r.id; $("emptyState").hidden = true; poll();
+  } catch (e) { alert(e.message); $("genBtn").disabled = false; }
+};
+
+async function poll() {
+  const j = await (await api("/api/jobs/" + state.job)).json();
+  const running = j.status === "running" || j.status === "queued";
+  $("progressBox").innerHTML = running
+    ? `<div class="progress"><b>ChatGPT is designing your thumbnails…</b> <span style="color:var(--muted)">${j.elapsed}s</span>
+         <div class="bar"><i></i></div>
+         <div class="row" style="margin:0"><details><summary>Show details</summary><pre class="log">${escapeHtml(j.log || "Starting…")}</pre></details>
+         <button class="btn" style="flex:0 0 auto" onclick="cancelJob()">Cancel</button></div></div>`
+    : j.status === "failed"
+    ? `<div class="progress"><div class="err">${escapeHtml(j.error || "Failed")}</div><details open style="margin-top:10px"><summary>Details</summary><pre class="log">${escapeHtml(j.log)}</pre></details></div>`
+    : "";
+  if (running) return setTimeout(poll, 2500);
+  $("genBtn").disabled = false;
+  if (j.status === "done") { showResults(j); loadHistory(); }
+}
+async function cancelJob() { await api(`/api/jobs/${state.job}/cancel`, { method: "POST" }); }
+
+function showResults(j) {
+  state.lastJob = j;
+  $("resultsWrap").hidden = false; $("emptyState").hidden = true;
+  $("results").innerHTML = j.images.map((u, i) => `<div class="res" data-i="${i}"><img src="${u}?t=${Date.now()}"/></div>`).join("");
+  $("results").onclick = (e) => { const el = e.target.closest(".res"); if (el) selectResult(+el.dataset.i); };
+  $("ovText").checked = j.textMode === "overlay";
+  selectResult(0);
+  $("resultsWrap").scrollIntoView({ behavior: "smooth" });
+}
+
+// ---------- editor ----------
+const editImg = new Image();
+const logoImg = new Image();
+function selectResult(i) {
+  [...$("results").children].forEach((x, k) => x.classList.toggle("on", k === i));
+  state.selected = state.lastJob.images[i];
+  $("editor").hidden = false;
+  editImg.onload = draw; editImg.src = state.selected + "?t=" + Date.now();
+}
+function coverDraw(ctx, img, W, H) {
+  const k = Math.max(W / img.width, H / img.height);
+  const w = img.width * k, h = img.height * k;
+  ctx.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+}
+function wrapLines(ctx, text, maxW) {
+  const words = text.split(/\s+/); const lines = []; let cur = "";
+  for (const w of words) { const t = cur ? cur + " " + w : w; if (ctx.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; } else cur = t; }
+  if (cur) lines.push(cur); return lines;
+}
+async function draw() {
+  if (!state.lastJob || !editImg.complete) return;
+  const [W, H] = SIZES[state.lastJob.aspect] || SIZES["16:9"];
+  const c = $("canvas"); c.width = W; c.height = H;
+  const ctx = c.getContext("2d");
+  coverDraw(ctx, editImg, W, H);
+
+  if ($("ovText").checked) {
+    const font = $("ovFont").value; const size = +$("ovSize").value * (W / 1280);
+    try { await document.fonts.load(`900 ${size}px "${font}"`, state.lastJob.headline); } catch {}
+    const pos = $("ovPos").value;
+    ctx.font = `900 ${size}px "${font}", "Hind", Impact, sans-serif`;
+    ctx.textBaseline = "top"; ctx.lineJoin = "round";
+    const pad = W * 0.04;
+    const side = pos === "left" || pos === "right";
+    const maxW = side ? W * 0.46 : W - pad * 2;
+    const text = state.lastJob.headline.toUpperCase();
+    const lines = wrapLines(ctx, text, maxW);
+    const lh = size * 1.05;
+    const blockH = lines.length * lh + (state.lastJob.subtext ? size * 0.55 : 0);
+    let y = pos === "bottom" ? H - pad - blockH : side ? (H - blockH) / 2 : pad;
+    ctx.textAlign = pos === "right" ? "right" : pos === "left" ? "left" : "center";
+    const x = pos === "right" ? W - pad : pos === "left" ? pad : W / 2;
+    const hiIdx = +$("ovHiWord").value; let wordNo = 0;
+    for (const line of lines) {
+      // draw word by word so one word can be highlighted
+      const words = line.split(" ");
+      const total = ctx.measureText(line).width;
+      let cx = ctx.textAlign === "center" ? x - total / 2 : ctx.textAlign === "right" ? x - total : x;
+      const saveAlign = ctx.textAlign; ctx.textAlign = "left";
+      for (const w of words) {
+        wordNo++;
+        ctx.lineWidth = size * 0.16; ctx.strokeStyle = "#000"; ctx.strokeText(w, cx, y);
+        ctx.fillStyle = wordNo === hiIdx ? $("ovHi").value : $("ovColor").value;
+        ctx.shadowColor = "rgba(0,0,0,.5)"; ctx.shadowBlur = size * 0.15; ctx.fillText(w, cx, y); ctx.shadowBlur = 0;
+        cx += ctx.measureText(w + " ").width;
+      }
+      ctx.textAlign = saveAlign; y += lh;
+    }
+    if (state.lastJob.subtext) {
+      const s2 = size * 0.42; ctx.font = `700 ${s2}px Inter, "Hind", sans-serif`;
+      const tw = ctx.measureText(state.lastJob.subtext).width; const bx = ctx.textAlign === "center" ? x - tw / 2 : ctx.textAlign === "right" ? x - tw : x;
+      ctx.fillStyle = $("ovHi").value; roundRect(ctx, bx - s2 * 0.35, y + s2 * 0.15, tw + s2 * 0.7, s2 * 1.35, s2 * 0.3); ctx.fill();
+      ctx.fillStyle = "#000"; ctx.textAlign = "left"; ctx.fillText(state.lastJob.subtext, bx, y + s2 * 0.35);
+    }
+  }
+  if ($("ovLogo").checked && state.logo && logoImg.complete && logoImg.naturalWidth) {
+    const lw = W * 0.12; const lh2 = lw * logoImg.naturalHeight / logoImg.naturalWidth;
+    ctx.drawImage(logoImg, W - lw - W * 0.025, W * 0.025, lw, lh2);
+  }
+}
+function roundRect(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+["ovText", "ovFont", "ovSize", "ovPos", "ovColor", "ovHi", "ovHiWord", "ovLogo"].forEach((id) => $(id).addEventListener("input", draw));
+$("dlBtn").onclick = () => {
+  $("canvas").toBlob((b) => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(b);
+    a.download = `trakin-thumb-${($("headline").value || "thumb").replace(/[^\wऀ-ॿ]+/g, "-").slice(0, 40)}.png`;
+    a.click();
+  }, "image/png");
+};
+
+async function loadBrand() {
+  const b = await (await api("/api/brand")).json();
+  state.logo = b.logo;
+  if (b.logo) { logoImg.onload = draw; logoImg.src = b.logo; $("logoHint").textContent = ""; }
+  else $("logoHint").textContent = "Put your logo as brand/logo.png to enable this.";
+}
+
+// ---------- history ----------
+async function loadHistory() {
+  const h = await (await api("/api/history")).json();
+  $("historyWrap").hidden = !h.length;
+  $("history").innerHTML = h.flatMap((x) => x.images.map((u) => `<img src="${u}" title="${escapeHtml(x.headline || "")}" data-job='${escapeHtml(JSON.stringify({ ...x, images: [u] }))}'/>`)).join("");
+  $("history").onclick = (e) => {
+    if (!e.target.dataset.job) return;
+    const x = JSON.parse(e.target.dataset.job);
+    showResults({ images: x.images, aspect: x.aspect || "16:9", headline: x.headline || "", subtext: "", textMode: "ai" });
+  };
+}
+
+function escapeHtml(s) { return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+
+async function boot() {
+  const r = await fetch("/api/me"); const me = await r.json();
+  HOSTED = me.hosted;
+  if (HOSTED && !me.user) return showLogin();
+  $("logoutBtn").hidden = !HOSTED;
+  loadStyles(); loadRefs(); loadAvatars(); loadBrand(); loadHistory(); checkStatus();
+}
+boot();
+</script>
+</body>
+</html>

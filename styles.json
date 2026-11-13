@@ -1,0 +1,92 @@
+[
+  {
+    "id": "trakin-reel",
+    "name": "Trakin Reel Cover",
+    "swatch": [
+      "#0a1a3a",
+      "#2563eb",
+      "#facc15"
+    ],
+    "prompt": "the channel's signature Reel cover formula. Vertical layout in three zones: (1) TOP ~25%: a huge 2-3 line headline in heavy condensed all-caps sans-serif, first line white, key line in bright yellow or orange (or the featured tool's brand colour), thick black outline and drop shadow, centred. (2) MIDDLE ~35%: the featured tool's app-icon as a glossy rounded-square tile with a curved white/yellow arrow pointing to a tilted, glowing screenshot card or before/after result cards showing what the tool does. (3) BOTTOM ~40%: the host, chest-up, centred, cropped by the bottom edge, friendly confident expression looking at camera, crisp and well lit with a soft rim light. Background: a rich, saturated gradient themed to the featured tool's brand colour (e.g. Claude = warm orange, ChatGPT = electric blue, WhatsApp = green, festive topics = maroon and gold with bokeh lights), with blurred tech UI panels, glow and depth. Bold, clean, premium, Indian-creator energy, everything readable at phone size."
+  },
+  {
+    "id": "tech-news",
+    "name": "Breaking Tech News",
+    "swatch": [
+      "#0b0f1a",
+      "#ff2d55",
+      "#ffd60a"
+    ],
+    "prompt": "high-energy Indian tech-news YouTube look. Dark navy background with glowing red and yellow accents, subtle light streaks, a bold 'BREAKING'-style energy, strong contrast, slight glow around the subject."
+  },
+  {
+    "id": "phone-review",
+    "name": "Phone Review",
+    "swatch": [
+      "#111111",
+      "#2f80ed",
+      "#ffffff"
+    ],
+    "prompt": "premium smartphone review look. Clean dark studio gradient, the phone shown large and sharp with realistic reflections, soft blue rim light, Apple-keynote level polish, minimal clutter."
+  },
+  {
+    "id": "versus",
+    "name": "Versus / Comparison",
+    "swatch": [
+      "#e63946",
+      "#1d3557",
+      "#f1faee"
+    ],
+    "prompt": "head-to-head comparison. Frame split diagonally into two contrasting colour halves (red vs blue), one product on each side, a big glowing 'VS' energy in the middle behind the host, dramatic lighting."
+  },
+  {
+    "id": "shock",
+    "name": "Shock / Reaction",
+    "swatch": [
+      "#ff6b00",
+      "#000000",
+      "#ffe600"
+    ],
+    "prompt": "viral reaction thumbnail. Saturated orange-to-black background, exaggerated surprised host expression, arrows or circle highlights pointing at the key detail, punchy and attention-grabbing but not messy."
+  },
+  {
+    "id": "clean-teal",
+    "name": "Clean Teal (Trakin)",
+    "swatch": [
+      "#041c1f",
+      "#14b8a6",
+      "#e6fffb"
+    ],
+    "prompt": "clean cinematic look: dark teal-to-black background, minimal rounded teal cards for the media, lots of breathing room, soft teal glow, no icons or decorative lines, very high readability."
+  },
+  {
+    "id": "money-deals",
+    "name": "Deals / Money",
+    "swatch": [
+      "#0f3d1f",
+      "#22c55e",
+      "#facc15"
+    ],
+    "prompt": "shopping deals and price-drop look. Deep green background, gold and green accents, price-tag and discount energy, products floating with soft shadows, festive sale vibe suited to Indian audiences."
+  },
+  {
+    "id": "ai-future",
+    "name": "AI / Futuristic",
+    "swatch": [
+      "#0a0118",
+      "#8b5cf6",
+      "#22d3ee"
+    ],
+    "prompt": "futuristic AI theme. Deep purple-black background with neon violet and cyan glow, subtle circuit or particle texture, holographic feel around the media cards, sleek and modern."
+  },
+  {
+    "id": "custom",
+    "name": "Custom",
+    "swatch": [
+      "#333333",
+      "#888888",
+      "#dddddd"
+    ],
+    "prompt": "follow the user's extra style notes closely."
+  }
+]
